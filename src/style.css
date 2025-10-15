@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: oklch(0.55 0.15 260);
+  --color-accent: oklch(0.65 0.20 320);
+  --color-neutral: oklch(0.23 0.02 256);
+  --font-family-display: "Inter Variable", sans-serif;
+}
+
+/* Responsive breakpoints using Tailwind's mobile-first approach */
+.hero-container {
+  @apply px-4 py-8;
+  
+  @media (min-width: 768px) {
+    @apply px-6 py-12;
+  }
+  
+  @media (min-width: 1024px) {
+    @apply px-8 py-16;
+  }
+}
+
+/* Modern glass-morphism effects for music apps */
+.glass-card {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl;
+}
+
+/* Smooth animations for professional feel */
+.slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
