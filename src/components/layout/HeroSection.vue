@@ -4,14 +4,32 @@ import { usePlaylistStore } from '@/stores/playlistStore'
 import PlaylistInput from '../ui/PlaylistInput.vue'
 import AuthButton from '../ui/AuthButton.vue'
 import AnalysisResults from '../features/AnalysisResults.vue'
+import UserPlaylists from '../features/UserPlaylists.vue'
 
 const playlistStore = usePlaylistStore()
 
-const samplePlaylistUrl = 'https://open.spotify.com/playlist/3wid7WMi2NuMiyYWZZjxTu?si=627360dd7a9345e9'
+// Sample playlists that work without authentication (public playlists)
+const samplePlaylists = [
+  {
+    name: 'EDM Workout Mix',
+    url: 'https://open.spotify.com/playlist/37i9dQZF1DX4dyzvuaRJ0n',
+    emoji: '⚡'
+  },
+  {
+    name: 'Deep House Vibes',
+    url: 'https://open.spotify.com/playlist/37i9dQZF1DX6J5NfMJS675',
+    emoji: '🎧'
+  },
+  {
+    name: 'Techno Bunker',
+    url: 'https://open.spotify.com/playlist/37i9dQZF1DX6J5NfMJS675',
+    emoji: '🔊'
+  }
+]
 
-const loadSamplePlaylist = () => {
+const loadSamplePlaylist = async (url: string) => {
   if (playlistStore.isAuthenticated) {
-    playlistStore.analyzePlaylist(samplePlaylistUrl)
+    await playlistStore.analyzePlaylist(url)
   }
 }
 </script>
@@ -38,20 +56,20 @@ const loadSamplePlaylist = () => {
       </div>
       
       <!-- Hero Section (show when no data) -->
-      <div v-if="!playlistStore.hasData" class="text-center max-w-4xl mx-auto">
+      <div v-if="!playlistStore.hasData" class="text-center max-w-4xl mx-auto space-y-12">
         <!-- Value Proposition -->
-        <div class="mb-12">
+        <div>
           <h2 class="text-3xl font-semibold text-white mb-6">
             Transform Your Playlists into Perfect DJ Sets
           </h2>
           <p class="text-lg text-neutral-300 max-w-2xl mx-auto leading-relaxed">
             Instantly analyze harmonic compatibility, optimize BPM transitions, 
-            and reorder tracks for seamless mixing. No login required—just paste and play.
+            and reorder tracks for seamless mixing. Connect with Spotify to get started!
           </p>
         </div>
         
         <!-- Feature Highlights -->
-        <div class="grid md:grid-cols-3 gap-8 mb-12">
+        <div class="grid md:grid-cols-3 gap-8">
           <div class="p-6 bg-neutral-900/50 rounded-2xl border border-neutral-800">
             <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
               🎵
@@ -80,16 +98,28 @@ const loadSamplePlaylist = () => {
         <!-- Playlist Input -->
         <PlaylistInput />
         
-        <!-- Demo/Sample -->
-        <div class="mt-8">
-          <p class="text-neutral-500 text-sm mb-4">Try with a sample playlist:</p>
-          <button 
-            class="text-accent hover:text-accent/80 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="!playlistStore.isAuthenticated"
-            @click="loadSamplePlaylist"
-          >
-            Load Popular EDM Mix Example
-          </button>
+        <!-- User Playlists (shown only when authenticated) -->
+        <UserPlaylists />
+        
+        <!-- Sample Playlists -->
+        <div>
+          <p class="text-neutral-500 text-sm mb-4">
+            {{ playlistStore.isAuthenticated ? 'Or try a sample playlist:' : 'Connect with Spotify to analyze these samples:' }}
+          </p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <button 
+              v-for="sample in samplePlaylists"
+              :key="sample.url"
+              class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-neutral-300 text-sm 
+                     transition-colors border border-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed
+                     flex items-center gap-2"
+              :disabled="!playlistStore.isAuthenticated"
+              @click="loadSamplePlaylist(sample.url)"
+            >
+              <span class="text-lg">{{ sample.emoji }}</span>
+              <span>{{ sample.name }}</span>
+            </button>
+          </div>
         </div>
       </div>
       

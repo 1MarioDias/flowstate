@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { SpotifyPlaylist, SpotifyTrack, SpotifyAudioFeatures } from '../types/spotify'
+import type { SpotifyPlaylist, SpotifyTrack, SpotifyAudioFeatures, SpotifyUser, SimplifiedPlaylist } from '../types/spotify'
 import type { PlaylistAnalysis, OptimizationOptions } from '../types/analysis'
 import { SpotifyService } from '../services/spotifyService'
 import { PlaylistAnalyzer } from '../services/playlistAnalyzer'
@@ -10,18 +10,21 @@ export const usePlaylistStore = defineStore('playlist', () => {
   const spotifyService = new SpotifyService({
     clientId: import.meta.env.VITE_SPOTIFY_CLIENT_ID || '',
     redirectUri: import.meta.env.VITE_SPOTIFY_REDIRECT_URI || '',
-    scopes: ['playlist-read-private', 'playlist-read-collaborative']
+    scopes: ['user-read-private', 'user-read-email', 'playlist-read-private', 'playlist-read-collaborative']
   })
   
   const playlistAnalyzer = new PlaylistAnalyzer()
   
   // State
   const isAuthenticated = ref(spotifyService.isAuthenticated())
+  const currentUser = ref<SpotifyUser | null>(null)
+  const userPlaylists = ref<SimplifiedPlaylist[]>([])
   const currentPlaylist = ref<SpotifyPlaylist | null>(null)
   const currentTracks = ref<SpotifyTrack[]>([])
   const currentAudioFeatures = ref<SpotifyAudioFeatures[]>([])
   const analysis = ref<PlaylistAnalysis | null>(null)
   const isAnalyzing = ref(false)
+  const isLoadingPlaylists = ref(false)
   const error = ref<string | null>(null)
   
   // Computed
@@ -39,11 +42,26 @@ export const usePlaylistStore = defineStore('playlist', () => {
       const success = await spotifyService.handleCallback()
       if (success) {
         isAuthenticated.value = true
+        // Fetch user data after successful authentication
+        await fetchUserData()
       }
       return success
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Authentication failed'
       return false
+    }
+  }
+  
+  const fetchUserData = async () => {
+    try {
+      const [user, playlists] = await Promise.all([
+        spotifyService.getCurrentUser(),
+        spotifyService.getUserPlaylists()
+      ])
+      currentUser.value = user
+      userPlaylists.value = playlists
+    } catch (err) {
+      console.error('Failed to fetch user data:', err)
     }
   }
   
@@ -89,6 +107,11 @@ export const usePlaylistStore = defineStore('playlist', () => {
     }
   }
   
+  const analyzePlaylistById = async (playlistId: string) => {
+    const url = `https://open.spotify.com/playlist/${playlistId}`
+    return analyzePlaylist(url)
+  }
+  
   const optimizePlaylist = (options: OptimizationOptions) => {
     if (!analysis.value) {
       throw new Error('No analysis available')
@@ -103,6 +126,8 @@ export const usePlaylistStore = defineStore('playlist', () => {
   const logout = () => {
     spotifyService.logout()
     isAuthenticated.value = false
+    currentUser.value = null
+    userPlaylists.value = []
     reset()
   }
   
@@ -117,10 +142,13 @@ export const usePlaylistStore = defineStore('playlist', () => {
   return {
     // State
     isAuthenticated,
+    currentUser,
+    userPlaylists,
     currentPlaylist,
     currentTracks,
     analysis,
     isAnalyzing,
+    isLoadingPlaylists,
     error,
     
     // Computed
@@ -130,7 +158,9 @@ export const usePlaylistStore = defineStore('playlist', () => {
     // Actions
     authenticate,
     handleCallback,
+    fetchUserData,
     analyzePlaylist,
+    analyzePlaylistById,
     optimizePlaylist,
     logout,
     reset

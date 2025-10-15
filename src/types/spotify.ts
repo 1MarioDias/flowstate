@@ -38,6 +38,10 @@ export interface SpotifyPlaylist {
       track: SpotifyTrack
     }[]
   }
+  owner?: {
+    display_name: string
+    id: string
+  }
 }
 
 export interface CamelotKey {
@@ -45,4 +49,28 @@ export interface CamelotKey {
   mode: number
   camelotCode: string
   musicalKey: string
+}
+
+export interface SpotifyUser {
+  id: string
+  display_name: string
+  email: string
+  images: { url: string; height: number; width: number }[]
+  country: string
+  product: string
+}
+
+export interface SimplifiedPlaylist {
+  id: string
+  name: string
+  description: string | null
+  images: { url: string }[]
+  tracks: {
+    total: number
+  }
+  owner: {
+    display_name: string
+    id: string
+  }
+  public: boolean
 }

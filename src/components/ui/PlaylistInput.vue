@@ -68,12 +68,5 @@ const handlePaste = (event: ClipboardEvent) => {
     <div v-if="playlistStore.error" class="mt-4 p-4 bg-red-500/10 border border-red-500/50 rounded-xl">
       <p class="text-red-400 text-sm">{{ playlistStore.error }}</p>
     </div>
-    
-    <!-- Auth Warning -->
-    <div v-if="!playlistStore.isAuthenticated" class="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-xl">
-      <p class="text-yellow-400 text-sm">
-        Please authenticate with Spotify first to analyze playlists.
-      </p>
-    </div>
   </div>
 </template>

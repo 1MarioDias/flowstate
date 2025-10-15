@@ -1,4 +1,4 @@
-import type { SpotifyTrack, SpotifyAudioFeatures, SpotifyPlaylist } from '../types/spotify'
+import type { SpotifyTrack, SpotifyAudioFeatures, SpotifyPlaylist, SpotifyUser, SimplifiedPlaylist } from '../types/spotify'
 
 export interface SpotifyConfig {
   clientId: string
@@ -229,6 +229,17 @@ export class SpotifyService {
     }
     
     return response.json()
+  }
+  
+  async getCurrentUser(): Promise<SpotifyUser> {
+    return this.fetchSpotify<SpotifyUser>('/me')
+  }
+  
+  async getUserPlaylists(limit: number = 50): Promise<SimplifiedPlaylist[]> {
+    const response = await this.fetchSpotify<{ items: SimplifiedPlaylist[] }>(
+      `/me/playlists?limit=${limit}`
+    )
+    return response.items
   }
   
   async getPlaylist(playlistId: string): Promise<SpotifyPlaylist> {

@@ -10,6 +10,10 @@ const handleAuth = async () => {
     playlistStore.logout()
   }
 }
+
+const getUserImage = () => {
+  return playlistStore.currentUser?.images[0]?.url || ''
+}
 </script>
 
 <template>
@@ -27,10 +31,29 @@ const handleAuth = async () => {
   </button>
   
   <div v-else class="flex items-center gap-3">
+    <!-- User Profile -->
+    <div class="flex items-center gap-3 px-4 py-2 bg-neutral-800/50 border border-neutral-700 rounded-xl">
+      <img 
+        v-if="getUserImage()"
+        :src="getUserImage()"
+        :alt="playlistStore.currentUser?.display_name"
+        class="w-8 h-8 rounded-full"
+      >
+      <div v-else class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+        {{ playlistStore.currentUser?.display_name?.charAt(0).toUpperCase() }}
+      </div>
+      <span class="text-white text-sm font-medium">
+        {{ playlistStore.currentUser?.display_name }}
+      </span>
+    </div>
+    
+    <!-- Connected Status -->
     <div class="flex items-center gap-2 px-4 py-2 bg-green-600/20 border border-green-600/50 rounded-xl">
       <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
       <span class="text-green-400 text-sm font-medium">Connected</span>
     </div>
+    
+    <!-- Logout Button -->
     <button
       @click="handleAuth"
       class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 rounded-xl text-neutral-300 text-sm 
